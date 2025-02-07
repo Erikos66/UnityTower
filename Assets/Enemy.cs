@@ -7,9 +7,6 @@ public class Enemy : MonoBehaviour
     private int _currentWaypointIndex;
     
     [SerializeField] private Transform[] waypoint;
-    [SerializeField] private float turnSpeed = 10f;
-    [SerializeField] private float distanceToTarget;
-   
     private void Awake()
     {
         // Gets the components from the parent object
