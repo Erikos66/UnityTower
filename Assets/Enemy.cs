@@ -4,14 +4,17 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour
 {
     private NavMeshAgent _agent;
-    [SerializeField] private Transform[] waypoint;
     private int _currentWaypointIndex;
-
+    
+    [SerializeField] private Transform[] waypoint;
+    [SerializeField] private float turnSpeed = 10f;
+    [SerializeField] private float distanceToTarget;
    
     private void Awake()
     {
         // Gets the components from the parent object
         _agent = GetComponent<NavMeshAgent>();
+        _agent.updateRotation = false;
     }
     
     /*
@@ -25,20 +28,18 @@ public class Enemy : MonoBehaviour
     {
         var targetPoint =  waypoint[_currentWaypointIndex].position;
         _currentWaypointIndex++;
-        if (_currentWaypointIndex >= waypoint.Length)
-        {
-            _currentWaypointIndex = 0;
-        }
-        return targetPoint;
-    } 
-    
+        return _currentWaypointIndex >= waypoint.Length ? transform.position : targetPoint;
+    }
+
+    private void FaceTarget(Vector3 newTarget) {
+        return;
+    }
     // I dont think using update for this is very effective it really doesn't need to check if its reached the waypoint every frame.
     // TODO: Use collision events to detect when the enemy reaches the waypoint instead.
     private void Update()
     {
-        if (_agent.remainingDistance < 0.1f)
-        {
-            _agent.SetDestination(GetNextWaypoint());
-        }
+        if (!(_agent.remainingDistance < 0.2f)) return;
+        var nextWaypoint = GetNextWaypoint();
+        _agent.SetDestination(nextWaypoint);
     }
 }
