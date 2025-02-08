@@ -12,6 +12,7 @@ public class Enemy : MonoBehaviour
         // Gets the components from the parent object
         _agent = GetComponent<NavMeshAgent>();
         _agent.updateRotation = false;
+        Debug.Log("Here we go...");
     }
     
     /*
