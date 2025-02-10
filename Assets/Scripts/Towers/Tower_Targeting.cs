@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tower : MonoBehaviour {
+public class TowerTargetting : MonoBehaviour {
 
     public enum TargetMode { Closest, Random } // Targeting modes
 
