@@ -6,6 +6,7 @@ public class Tower : MonoBehaviour {
     public enum TargetMode { Closest, Random } // Targeting modes
     [SerializeField] protected float attackCooldown = 1f; // Attack cooldown of the tower
     protected float lastTimeAttacked; // Timer to keep track of the attack cooldown
+    private bool canRotate = true; // Flag to enable or disable tower head rotation
 
     [Header("Targeting Settings")]
     [SerializeField] protected TargetMode targetMode = TargetMode.Random; // Default target mode
@@ -19,7 +20,7 @@ public class Tower : MonoBehaviour {
         // Find the target enemy
         FindTarget();
 
-        // Rotate the tower head towards the target enemy
+        // Rotate the tower head towards the target enemy if rotation is enabled
         RotateTowardsEnemy();
 
         // Check if the attack cooldown has passed and the tower has a target enemy
@@ -28,6 +29,9 @@ public class Tower : MonoBehaviour {
             lastTimeAttacked = Time.time;
             Attack();
         }
+    }
+
+    protected virtual void Awake() {
     }
 
     /// <summary>
@@ -45,11 +49,11 @@ public class Tower : MonoBehaviour {
                 FindClosestEnemy(hitEnemies);
                 break;
             case TargetMode.Random:
-                // Find a random enemy
                 FindRandomEnemy(hitEnemies);
                 break;
             default:
                 // If the target mode is invalid, do nothing
+                Debug.LogWarning("Invalid target mode on tower" + name);
                 break;
         }
     }
@@ -86,8 +90,8 @@ public class Tower : MonoBehaviour {
     /// </summary>
     /// <param name="hitEnemies">Array of colliders representing the enemies in range.</param>
     protected void FindRandomEnemy(Collider[] hitEnemies) {
-        if (hitEnemies.Length == 0) {
-            currentEnemy = null;
+        if (hitEnemies.Length == 0 ||
+            (currentEnemy != null && (transform.position - currentEnemy.position).sqrMagnitude <= attackRange * attackRange)) {
             return;
         }
 
@@ -101,6 +105,7 @@ public class Tower : MonoBehaviour {
     /// Rotates the tower head towards the current enemy.
     /// </summary>
     protected virtual void RotateTowardsEnemy() {
+        if (!canRotate) return;
         if (currentEnemy == null) return;
 
         // Calculate the direction from the tower head to the current enemy
@@ -130,5 +135,9 @@ public class Tower : MonoBehaviour {
     protected Vector3 DirectionToEnemy(Transform startPoint) {
         if (currentEnemy == null) return Vector3.zero;
         return (currentEnemy.position - startPoint.position).normalized;
+    }
+
+    public void EnableRotation(bool enable) {
+        canRotate = enable;
     }
 }
