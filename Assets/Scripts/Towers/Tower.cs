@@ -31,7 +31,8 @@ public class Tower : MonoBehaviour {
     }
 
     /// <summary>
-    /// Finds and assigns the target enemy based on the target mode
+    /// Finds and assigns the target enemy based on the target mode.
+    /// <para>Target modes are: Closest, Random</para>
     /// </summary>
     protected virtual void FindTarget() {
         // Find all enemies within the attack range
@@ -59,8 +60,8 @@ public class Tower : MonoBehaviour {
 
     /// <summary>
     /// Finds and assigns the closest enemy within the attack range to the current enemy.
+    /// <para><param name="hitEnemies">Array of colliders representing the enemies in range.</param> </para>
     /// </summary>
-    /// <param name="hitEnemies">Array of colliders representing the enemies in range.</param>
     protected void FindClosestEnemy(Collider[] hitEnemies) {
         // Initialize currentEnemy to null
         currentEnemy = null;
