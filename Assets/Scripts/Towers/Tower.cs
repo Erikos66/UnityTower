@@ -16,23 +16,40 @@ public class Tower : MonoBehaviour {
     protected Transform currentEnemy;
 
     protected virtual void Update() {
+        // Find the target enemy
         FindTarget();
+
+        // Rotate the tower head towards the target enemy
         RotateTowardsEnemy();
+
+        // Check if the attack cooldown has passed and the tower has a target enemy
+        // If so, update the last time attacked and call the attack method
         if (currentEnemy != null && Time.time - lastTimeAttacked >= attackCooldown) {
             lastTimeAttacked = Time.time;
             Attack();
         }
     }
 
-    // Find the target based on the target mode and assign it to the current enemy
+    /// <summary>
+    /// Finds and assigns the target enemy based on the target mode
+    /// </summary>
     protected virtual void FindTarget() {
+        // Find all enemies within the attack range
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, LayerMask.GetMask("Enemy"));
 
-        if (targetMode == TargetMode.Closest) {
-            FindClosestEnemy(hitEnemies);
-        }
-        else if (targetMode == TargetMode.Random) {
-            FindRandomEnemy(hitEnemies);
+        // Assign the target enemy based on the target mode
+        switch (targetMode) {
+            case TargetMode.Closest:
+                // Find the closest enemy
+                FindClosestEnemy(hitEnemies);
+                break;
+            case TargetMode.Random:
+                // Find a random enemy
+                FindRandomEnemy(hitEnemies);
+                break;
+            default:
+                // If the target mode is invalid, do nothing
+                break;
         }
     }
 
@@ -40,42 +57,62 @@ public class Tower : MonoBehaviour {
         if (currentEnemy == null) return;
     }
 
-    // Find the closest enemy in the attack range and assign it to the current enemy
+    /// <summary>
+    /// Finds and assigns the closest enemy within the attack range to the current enemy.
+    /// </summary>
+    /// <param name="hitEnemies">Array of colliders representing the enemies in range.</param>
     protected void FindClosestEnemy(Collider[] hitEnemies) {
-        float closestDistance = attackRange;
-        Transform closestEnemy = null;
+        // Initialize currentEnemy to null
+        currentEnemy = null;
+        // Calculate attack range squared for distance comparison
+        float closestDistanceSqr = attackRange * attackRange;
 
+        // Iterate through all the enemies in range
         foreach (var enemy in hitEnemies) {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestEnemy = enemy.transform;
+            // Calculate squared distance from the tower to the enemy
+            float distanceSqr = (transform.position - enemy.transform.position).sqrMagnitude;
+            // Check if this enemy is closer than the previously found ones
+            if (distanceSqr < closestDistanceSqr) {
+                closestDistanceSqr = distanceSqr;
+                // Assign this enemy as the current closest enemy
+                currentEnemy = enemy.transform;
             }
         }
-
-        currentEnemy = closestEnemy; // Assign closest enemy
     }
 
-    // Find a random enemy in the attack range and assign it to the current enemy if it's not the same as the current enemy
+    /// <summary>
+    /// Finds and assigns a random enemy in the attack range to the current enemy if it's not the same as the current enemy.
+    /// </summary>
+    /// <param name="hitEnemies">Array of colliders representing the enemies in range.</param>
     protected void FindRandomEnemy(Collider[] hitEnemies) {
-        if (currentEnemy != null && Vector3.Distance(transform.position, currentEnemy.position) <= attackRange)
-            return;
-        if (hitEnemies.Length > 0) {
-            int randomIndex = Random.Range(0, hitEnemies.Length);
-            currentEnemy = hitEnemies[randomIndex].transform;
-        }
-        else {
+        if (hitEnemies.Length == 0) {
             currentEnemy = null;
+            return;
         }
+
+        // Select a random enemy from the array
+        int randomIndex = Random.Range(0, hitEnemies.Length);
+        // Assign the selected enemy to the current enemy
+        currentEnemy = hitEnemies[randomIndex].transform;
     }
 
-    // Rotate the tower head towards the current enemy
+    /// <summary>
+    /// Rotates the tower head towards the current enemy.
+    /// </summary>
     protected virtual void RotateTowardsEnemy() {
         if (currentEnemy == null) return;
 
-        Vector3 direction = currentEnemy.position - towerHead.position;
-        Quaternion lookRotation = Quaternion.LookRotation(direction);
-        towerHead.rotation = Quaternion.Lerp(towerHead.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+        // Calculate the direction from the tower head to the current enemy
+        Vector3 directionToEnemy = currentEnemy.position - towerHead.position;
+        // Calculate the look rotation from the direction
+        Quaternion lookRotation = Quaternion.LookRotation(directionToEnemy);
+
+        // Smoothly rotate the tower head towards the look rotation
+        towerHead.rotation = Quaternion.Lerp(
+            towerHead.rotation,
+            lookRotation,
+            Time.deltaTime * rotationSpeed
+        );
     }
 
     // Draw attack range gizmo in the editor for visual representation
@@ -84,6 +121,11 @@ public class Tower : MonoBehaviour {
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
+    /// <summary>
+    /// Calculates the direction from a given start point to the current enemy, or zero if there is no current enemy.
+    /// </summary>
+    /// <param name="startPoint">The point from which to calculate the direction.</param>
+    /// <returns>The direction from the start point to the current enemy, or zero if there is no current enemy.</returns>
     protected Vector3 DirectionToEnemy(Transform startPoint) {
         if (currentEnemy == null) return Vector3.zero;
         return (currentEnemy.position - startPoint.position).normalized;
