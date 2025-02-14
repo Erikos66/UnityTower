@@ -1,26 +1,31 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
+// This class handles the visual effects for the Tower_Crossbow including attack effects and emissive color updates.
 public class Tower_Crossbow_Visuals : MonoBehaviour {
-    [SerializeField] private LineRenderer attackVisuals; // LineRenderer used for displaying the attack visual effect.
-    [SerializeField] private float attackVisualsDuration = 0.2f; // Duration to display the attack visual effect.
-    private Tower_Crossbow towerCrossbow; // Reference to the Tower_Crossbow component to control rotation.
+    [SerializeField] private LineRenderer attackVisuals; // LineRenderer used for displaying the attack visual effect. (Assigned via Inspector)
+    [SerializeField] private float attackVisualsDuration = 0.2f; // Duration (in seconds) for which the attack visual effect is displayed.
+    private Tower_Crossbow towerCrossbow; // Cached reference to the Tower_Crossbow component for controlling tower rotation.
 
     [Header("Glowing Visuals")]
-    [SerializeField] private MeshRenderer stringRenderer; // MeshRenderer for the string of the crossbow.
-    [SerializeField] private Material stringMaterial; // Material for the string of the crossbow.
-    [SerializeField] private float currentIntensity = 0.0f; // Current intensity of the emissive material.
-    [SerializeField] private float maxIntensity = 1.0f; // Maximum intensity of the emissive material.
+    [SerializeField] private MeshRenderer stringRenderer; // MeshRenderer for the crossbow string, used to display glowing effects.
+    [SerializeField] private Material stringMaterial; // Material used by the stringRenderer that supports emissive properties.
+    [Space]
+    private float currentIntensity = 0.0f; // Current intensity level for the emissive visual effect.
+    private float maxIntensity = 1.0f; // Maximum emissive intensity achievable.
+    [Space]
+    [SerializeField] private Color startColor; // Starting color for the emissive effect.
+    [SerializeField] private Color endColor; // Ending color representing full emissive intensity.
 
     /// <summary>
-    /// Unity Awake method for caching the Tower_Crossbow component.
+    /// Unity Awake method for caching components and initializing the emissive material.
     /// </summary>
     private void Awake() {
         towerCrossbow = GetComponent<Tower_Crossbow>(); // Cache the Tower_Crossbow component.
-
-        stringMaterial = new Material(stringRenderer.material); // Create a new material from the stringRenderer material.
-
-        stringRenderer.material = stringMaterial; // Set the material to the stringRenderer.
+        stringMaterial = new Material(stringRenderer.material); // Create a new instance of the string's material.
+        stringRenderer.material = stringMaterial; // Assign the new material to the MeshRenderer.
+        StartCoroutine(ChangeEmissionLevel(0.5f)); // Ramp up the emissive effect on awake over 0.5 seconds.
     }
 
     /// <summary>
@@ -29,37 +34,64 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
     /// <param name="startpoint">Starting point of the visual effect.</param>
     /// <param name="endpoint">Ending point of the visual effect.</param>
     public void PlayAttackVFX(Vector3 startpoint, Vector3 endpoint) {
-        StartCoroutine(ChangeEmission(3));
-        StartCoroutine(VFXCoroutione(startpoint, endpoint));
+        currentIntensity = 0f; // Reset emissive intensity to base (firing state).
+        StartCoroutine(VFXCoroutione(startpoint, endpoint)); // Start the coroutine to display attack visuals.
     }
 
     /// <summary>
-    /// Coroutine that displays the attack visual effect, disables tower rotation during the effect, then re-enables it.
+    /// Unity Update method to update the emissive color every frame.
+    /// </summary>
+    private void Update() {
+        UpdateEmissionColor(); // Update the material's emissive color based on the current intensity.
+    }
+
+    /// <summary>
+    /// Initiates the reload visual effect by gradually increasing the emissive intensity.
+    /// </summary>
+    /// <param name="duration">Reload duration over which the emissive intensity increases.</param>
+    public void ReloadDurationVFX(float duration) {
+        StartCoroutine(ChangeEmissionLevel(duration - 1)); // Start reload visual effect (reducing duration by 1 sec).
+    }
+
+    /// <summary>
+    /// Updates the emission color of the string material based on the current emissive intensity.
+    /// </summary>
+    private void UpdateEmissionColor() {
+        Color emissionColor = Color.Lerp(startColor, endColor, currentIntensity / maxIntensity); // Interpolate between start and end colors.
+        emissionColor *= Mathf.LinearToGammaSpace(currentIntensity); // Adjust the brightness based on the intensity.
+        stringMaterial.SetColor("_EmissionColor", emissionColor); // Apply the calculated color to the material.
+    }
+
+    /// <summary>
+    /// Coroutine that displays the attack visual effect.
+    /// It disables tower rotation, activates the LineRenderer, waits, then resets the state.
     /// </summary>
     /// <param name="startpoint">Starting point of the visual effect.</param>
     /// <param name="endpoint">Ending point of the visual effect.</param>
     /// <returns>IEnumerator for coroutine handling.</returns>
     private IEnumerator VFXCoroutione(Vector3 startpoint, Vector3 endpoint) {
-        towerCrossbow.EnableRotation(false);
-        attackVisuals.enabled = true;
-        attackVisuals.SetPosition(0, startpoint);
-        attackVisuals.SetPosition(1, endpoint);
-
-        yield return new WaitForSeconds(attackVisualsDuration);
-        attackVisuals.enabled = false;
-        towerCrossbow.EnableRotation(true);
+        towerCrossbow.EnableRotation(false); // Disable tower rotation during visual effect.
+        attackVisuals.enabled = true; // Enable the LineRenderer.
+        attackVisuals.SetPosition(0, startpoint); // Set the start position of the line.
+        attackVisuals.SetPosition(1, endpoint);   // Set the end position of the line.
+        yield return new WaitForSeconds(attackVisualsDuration); // Wait for the set duration.
+        attackVisuals.enabled = false; // Disable the LineRenderer after effect.
+        towerCrossbow.EnableRotation(true); // Re-enable tower rotation.
     }
 
-    // New coroutine to increase emissive intensity of the stringMaterial.
-    private IEnumerator ChangeEmission(float duration) {
-        float startIntensity = 0;
-        float startTime = Time.time;
-        while (startTime < duration) {
-            float tValue = (Time.time - startTime) / duration;
-            currentIntensity = Mathf.Lerp(startIntensity, maxIntensity, tValue);
-            yield return null;
+    /// <summary>
+    /// Coroutine to gradually increase the emissive intensity of the string material over a given duration.
+    /// </summary>
+    /// <param name="duration">The time in seconds over which the emission level is increased.</param>
+    /// <returns>IEnumerator for coroutine management.</returns>
+    private IEnumerator ChangeEmissionLevel(float duration) {
+        float startTime = Time.time; // Record the starting time.
+        float startIntensity = 0f; // Initial emissive intensity.
+        while ((Time.time - startTime) < duration) { // Continue until the duration has passed.
+            float tValue = (Time.time - startTime) / duration; // Calculate normalized elapsed time.
+            currentIntensity = Mathf.Lerp(startIntensity, maxIntensity, tValue); // Gradually interpolate intensity.
+            yield return null; // Wait for next frame.
         }
-        currentIntensity = maxIntensity;
+        currentIntensity = maxIntensity; // Ensure the intensity is at maximum when done.
     }
-
 }

@@ -2360,7 +2360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d03770e1489545439b98bcb66e52dca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackCooldown: 1
+  attackCooldown: 2
   targetMode: 1
   attackRange: 3
   towerHead: {fileID: 5939657836898488001}
@@ -2380,6 +2380,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackVisuals: {fileID: 1194745658}
   attackVisualsDuration: 0.2
+  stringRenderer: {fileID: 135858715302498217}
+  stringMaterial: {fileID: 2100000, guid: becbb4dde857e67428161d08a1fdbac9, type: 2}
+  currentIntensity: 0
+  maxIntensity: 1
+  startColor: {r: 0, g: 0, b: 0, a: 0}
+  endColor: {r: 0.047058824, g: 0.7607843, b: 0.7921569, a: 1}
 --- !u!1 &1071962904
 GameObject:
   m_ObjectHideFlags: 0
