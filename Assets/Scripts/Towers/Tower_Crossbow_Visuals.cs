@@ -17,6 +17,30 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
     [Space]
     [SerializeField] private Color startColor; // Starting color for the emissive effect.
     [SerializeField] private Color endColor; // Ending color representing full emissive intensity.
+    [SerializeField] private LineRenderer[] stringRenderers; // Array of LineRenderers for the crossbow strings.
+
+    [Header("Crossbow Line Renderers")]
+    [SerializeField] private LineRenderer frontString_L; // LineRenderer for the front string of the crossbow.
+    [SerializeField] private LineRenderer frontString_R;
+    [SerializeField] private LineRenderer rearString_L; // LineRenderer for the rear string of the crossbow.
+    [SerializeField] private LineRenderer rearString_R;
+
+    [Header("Rotar Points")]
+    [SerializeField] private Transform frontRotar_L;
+    [SerializeField] private Transform frontRotar_R;
+    [SerializeField] private Transform rearRotar_L;
+    [SerializeField] private Transform rearRotar_R;
+
+    [Header("Crossbow Points")]
+    [SerializeField] private Transform frontCrossbow_L;
+    [SerializeField] private Transform frontCrossbow_R;
+    [SerializeField] private Transform rearCrossbow_L;
+    [SerializeField] private Transform rearCrossbow_R;
+
+    [Header("Rotar Visuals")]
+    [SerializeField] private Transform rotarUnloaded;
+    [SerializeField] private Transform rotarLoaded;
+    [SerializeField] private Transform rotor; // New: reference to the rotor to animate.
 
     /// <summary>
     /// Unity Awake method for caching components and initializing the emissive material.
@@ -25,15 +49,20 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
         towerCrossbow = GetComponent<Tower_Crossbow>(); // Cache the Tower_Crossbow component.
         stringMaterial = new Material(stringRenderer.material); // Create a new instance of the string's material.
         stringRenderer.material = stringMaterial; // Assign the new material to the MeshRenderer.
+        foreach (LineRenderer stringRenderer in stringRenderers) {
+            stringRenderer.material = stringMaterial; // Assign the new material to all LineRenderers.
+        }
         StartCoroutine(ChangeEmissionLevel(0.5f)); // Ramp up the emissive effect on awake over 0.5 seconds.
+        ReloadDurationVFX(2); // New: trigger the reload visual effect on awake.
     }
 
     /// <summary>
-    /// Plays the attack visual effects.
+    /// Plays the attack visual effects and resets the rotor.
     /// </summary>
     /// <param name="startpoint">Starting point of the visual effect.</param>
     /// <param name="endpoint">Ending point of the visual effect.</param>
     public void PlayAttackVFX(Vector3 startpoint, Vector3 endpoint) {
+        ResetRotorPosition(); // New: reset rotor position when firing.
         currentIntensity = 0f; // Reset emissive intensity to base (firing state).
         StartCoroutine(VFXCoroutione(startpoint, endpoint)); // Start the coroutine to display attack visuals.
     }
@@ -42,15 +71,19 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
     /// Unity Update method to update the emissive color every frame.
     /// </summary>
     private void Update() {
-        UpdateEmissionColor(); // Update the material's emissive color based on the current intensity.
+        UpdateEmissionColor(); // Update the material's emissive color based on the current intensity
+        ConnectCrossbowStrings();
     }
 
     /// <summary>
-    /// Initiates the reload visual effect by gradually increasing the emissive intensity.
+    /// Initiates the reload visual effect including rotor animation.
     /// </summary>
     /// <param name="duration">Reload duration over which the emissive intensity increases.</param>
     public void ReloadDurationVFX(float duration) {
-        StartCoroutine(ChangeEmissionLevel(duration - 1)); // Start reload visual effect (reducing duration by 1 sec).
+        duration -= 1f;
+
+        StartCoroutine(ChangeEmissionLevel(duration)); // Start reload visual effect (reducing duration by 1 sec).
+        StartCoroutine(AnimateRotorReload(duration)); // New: animate rotor movement during reload.
     }
 
     /// <summary>
@@ -93,5 +126,54 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
             yield return null; // Wait for next frame.
         }
         currentIntensity = maxIntensity; // Ensure the intensity is at maximum when done.
+    }
+
+    // New: resets the rotor position to the starting point.
+    private void ResetRotorPosition() {
+        if (rotor != null) {
+            rotor.position = rotarUnloaded.position;
+        }
+    }
+
+    // New: coroutine that moves the rotor from start to cocked (rotarEnd) over the reload duration.
+    private IEnumerator AnimateRotorReload(float reloadDuration) {
+        float startTime = Time.time;
+
+        while (Time.time - startTime < reloadDuration) {
+            float tValue = (Time.time - startTime) / reloadDuration;
+            rotor.position = Vector3.Lerp(rotarUnloaded.position, rotarLoaded.position, tValue);
+            yield return null;
+        }
+
+    }
+
+    public void ConnectCrossbowStrings() {
+        // Connect front left: from frontRotar_L to frontCrossbow_L
+        if (frontString_L != null && frontRotar_L != null && frontCrossbow_L != null) {
+            frontString_L.positionCount = 2;
+            frontString_L.SetPosition(0, frontRotar_L.position);
+            frontString_L.SetPosition(1, frontCrossbow_L.position);
+        }
+
+        // Connect front right: from frontRotar_R to frontCrossbow_R
+        if (frontString_R != null && frontRotar_R != null && frontCrossbow_R != null) {
+            frontString_R.positionCount = 2;
+            frontString_R.SetPosition(0, frontRotar_R.position);
+            frontString_R.SetPosition(1, frontCrossbow_R.position);
+        }
+
+        // Connect rear left: from rearRotar_L to rearCrossbow_L
+        if (rearString_L != null && rearRotar_L != null && rearCrossbow_L != null) {
+            rearString_L.positionCount = 2;
+            rearString_L.SetPosition(0, rearRotar_L.position);
+            rearString_L.SetPosition(1, rearCrossbow_L.position);
+        }
+
+        // Connect rear right: from rearRotar_R to rearCrossbow_R
+        if (rearString_R != null && rearRotar_R != null && rearCrossbow_R != null) {
+            rearString_R.positionCount = 2;
+            rearString_R.SetPosition(0, rearRotar_R.position);
+            rearString_R.SetPosition(1, rearCrossbow_R.position);
+        }
     }
 }
