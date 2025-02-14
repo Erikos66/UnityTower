@@ -36,6 +36,7 @@ bld/
 [Ll]ogs/
 [Ll]ogs/*
 Logs/
+Logs/*
 Log/*
 Log/
 build/
@@ -324,3 +325,4 @@ test-results/
 
 # Editor config
 .editorconfig
+Logs/shadercompiler*
