@@ -11,7 +11,6 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneWindows64
-          - iOS
           - Android
           - WebGL
     runs-on: ubuntu-latest
@@ -39,12 +38,13 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
+          unityVersion: 6000.0.36f1
+          modules: StandaloneLinux64, StandaloneWindows64, WebGL
 
       - name: Delete Old GitHub Release
         uses: liudonghua123/delete-release-action@v1
         with:
           release_name: 'latest'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true 
 
       - name: Delete Old Git Tag (If Exists)
@@ -54,12 +54,12 @@ jobs:
         continue-on-error: true  
 
       - name: Create or Update "Latest" Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: latest
+          tag_name: latest  # Always use 'latest'
           release_name: "Latest Unity Build"
-          body: "This release is automatically updated with the latest successful Unity build."
+          body: "🚀 This release is automatically updated with the latest successful Unity build."
           draft: false
           prerelease: false
-          files: build/*
+          files: build/**
           token: ${{ secrets.GITHUB_TOKEN }}
