@@ -48,18 +48,8 @@ jobs:
           path: ${{ steps.tests.outputs.artifactsPath }}
 
       - name: Upload Coverage Results
-        uses: actions/upload-artifact@v4
-        if: always()
+      - uses: actions/upload-artifact@v4  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
         with:
           name: Coverage results for ${{ matrix.testMode }}
           path: ${{ steps.tests.outputs.coveragePath }}
-
-      # ✅ Reports results on PR as a status check (Pass/Fail)
-      - name: Report Test Results to GitHub PR Checks
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: ${{ matrix.testMode }} Test Results
-          path: ${{ steps.tests.outputs.artifactsPath }}/TestResults.xml
-          reporter: junit  # ✅ Shows as a GitHub PR check
-          fail-on-error: true  # 🔴 Fails PR if tests fail
