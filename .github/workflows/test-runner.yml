@@ -1,4 +1,4 @@
-            - name: Unity - Test runner
+name: Unity - Test runner
   # You may pin to the exact commit or the version.
   # uses: game-ci/unity-test-runner@0ff419b913a3630032cbe0de48a0099b5a9f0ed9
   uses: game-ci/unity-test-runner@v4
