@@ -1,4 +1,4 @@
-name: Unity PR Editmode Testing
+name: Unity Editmode Test
 
 on:
   pull_request:
