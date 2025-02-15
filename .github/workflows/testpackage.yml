@@ -3,7 +3,7 @@ name: Build Test
 on:
   pull_request:
     branches:
-      - master  # ✅ Runs only when a PR is opened/updated against 'master'
+      - master  # ✅ Runs tests when a PR is created or updated against 'master'
 
 jobs:
   testAllModes:
@@ -14,7 +14,7 @@ jobs:
       matrix:
         projectPath:
           - test-package
-        unityVersion: '6000.0.36f1' # some version must be included for package testing
+        unityVersion: '6000.0.36f1' # Required for Unity package testing
         testMode:
           - playmode
           - editmode
@@ -54,11 +54,12 @@ jobs:
           name: Coverage results for ${{ matrix.testMode }}
           path: ${{ steps.tests.outputs.coveragePath }}
 
-      # ✅ Fail PR if tests fail (blocks merge)
-      - name: Report Test Results to GitHub PR
-        if: always()
+      # ✅ Reports results on PR as a status check (Pass/Fail)
+      - name: Report Test Results to GitHub PR Checks
         uses: dorny/test-reporter@v1
+        if: always()
         with:
           name: ${{ matrix.testMode }} Test Results
           path: ${{ steps.tests.outputs.artifactsPath }}/TestResults.xml
-          reporter: junit  # ✅ If tests fail, PR is marked as failing
+          reporter: junit  # ✅ Shows as a GitHub PR check
+          fail-on-error: true  # 🔴 Fails PR if tests fail
