@@ -4,12 +4,12 @@ on:
   # ✅ Trigger tests only when a PR is created or updated
   pull_request:
     branches:
-      - main  # Runs tests before merging into 'main'
+      - master  # Runs tests before merging into 'main'
 
   # ✅ Trigger builds only AFTER a PR has been merged into 'main'
   push:
     branches:
-      - main  # Runs a full build after merging
+      - master  # Runs a full build after merging
 
 jobs:
   # === 🛠 TEST JOB (Runs on PRs Only) ===
@@ -35,7 +35,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: test-package  # Adjust to your Unity project path
-          unityVersion: 2022.3.7f1  # Change this to match your Unity version
+          unityVersion: 6000.0.36f1  # Change this to match your Unity version
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
