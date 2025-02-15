@@ -1,54 +1,59 @@
 name: Unity - Test runner
+on: [push, pull_request]
   # You may pin to the exact commit or the version.
   # uses: game-ci/unity-test-runner@0ff419b913a3630032cbe0de48a0099b5a9f0ed9
-  uses: game-ci/unity-test-runner@v4
-  with:
-    # Version of unity to use for testing the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt. ⚠️ If testing a Unity Package, this field is required and cannot be set to "auto".
-    unityVersion: # optional, default is auto
-    # Specific docker image that should be used for testing the project. If packageMode is true, this image must have jq installed.
-    customImage: # optional, default is 
-    # Path to the Unity project or package to be tested.
-    projectPath: # optional
-    # Extra parameters to configure the Unity editor run.
-    customParameters: # optional
-    # The type of tests to be run by the test runner.
-    testMode: # optional, default is all
-    # Optional coverage parameters for the -coverageOptions argument. To get coverage in Package Mode, pass assemblies from the package you want covered to the assemblyFilters option.
-    coverageOptions: # optional, default is generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;dontClear
-    # Path where test artifacts should be stored.
-    artifactsPath: # optional, default is artifacts
-    # Initialises Docker using the host network.
-    useHostNetwork: # optional
-    # SSH Agent path to forward to the container.
-    sshAgent: # optional, default is 
-    # Path to a directory containing SSH public keys to forward to the container.
-    sshPublicKeysDirectoryPath: # optional, default is 
-    # GitHub Private Access Token (PAT) to pull from GitHub.
-    gitPrivateToken: # optional, default is 
-    # Token to authorize access to the GitHub REST API. If provided, a check run will be created with the test results.
-    githubToken: # optional, default is 
-    # Name for the check run that is created when a github token is provided.
-    checkName: # optional, default is Test Results
-    # Whether the tests are being run for a Unity package instead of a Unity project. If true, the action can only be run on Linux runners, and any custom docker image passed to this action must have `jq` installed. NOTE: may not work properly for packages with dependencies outside of the Unity Registry.
-    packageMode: false
-    # Scoped registry to use for resolving package dependencies. Only applicable if packageMode is true.
-    scopedRegistryUrl: # optional, default is 
-    # Registry scopes to use for resolving package dependencies. Only applicable if packageMode is true. Required if scopedRegistry is set.
-    registryScopes: # optional, default is 
-    # User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts
-    chownFilesTo: # optional, default is 
-    # Number of CPU cores to assign the docker container. Defaults to all available cores on all platforms.
-    dockerCpuLimit: # optional, default is 
-    # Amount of memory to assign the docker container. Defaults to 95% of total system memory rounded down to the nearest megabyte on Linux and 80% on Windows. On unrecognized platforms, defaults to 75% of total system memory. To manually specify a value, use the format <number><unit>, where unit is either m or g. ie: 512m = 512 megabytes
-    dockerMemoryLimit: # optional, default is 
-    # Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Default will pick the default mode as described by Microsoft where server versions use process and desktop versions use hyperv. Only applicable on Windows
-    dockerIsolationMode: # optional, default is default
-    # Url to a unity license server for acquiring floating licenses.
-    unityLicensingServer: # optional, default is 
-    # Container registry and repository to pull image from. Only applicable if customImage is not set.
-    containerRegistryRepository: # optional, default is unityci/editor
-    # Container registry image version. Only applicable if customImage is not set.
-    containerRegistryImageVersion: # optional, default is 3
-    # Whether to run as a user that matches the host system or the default root container user. Only applicable to Linux hosts and containers. This is useful for fixing permission errors on Self-Hosted runners.
-    runAsHostUser: # optional, default is false
-          
+uses: game-ci/unity-test-runner@v4
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+with:
+  # Version of unity to use for testing the project. Use "auto" to get from your ProjectSettings/ProjectVersion.txt. ⚠️ If testing a Unity Package, this field is required and cannot be set to "auto".
+  unityVersion: # optional, default is auto
+  # Specific docker image that should be used for testing the project. If packageMode is true, this image must have jq installed.
+  customImage: # optional, default is 
+  # Path to the Unity project or package to be tested.
+  projectPath: # optional
+  # Extra parameters to configure the Unity editor run.
+  customParameters: # optional
+  # The type of tests to be run by the test runner.
+  testMode: # optional, default is all
+  # Optional coverage parameters for the -coverageOptions argument. To get coverage in Package Mode, pass assemblies from the package you want covered to the assemblyFilters option.
+  coverageOptions: # optional, default is generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;dontClear
+  # Path where test artifacts should be stored.
+  artifactsPath: # optional, default is artifacts
+  # Initialises Docker using the host network.
+  useHostNetwork: # optional
+  # SSH Agent path to forward to the container.
+  sshAgent: # optional, default is 
+  # Path to a directory containing SSH public keys to forward to the container.
+  sshPublicKeysDirectoryPath: # optional, default is 
+  # GitHub Private Access Token (PAT) to pull from GitHub.
+  gitPrivateToken: # optional, default is 
+  # Token to authorize access to the GitHub REST API. If provided, a check run will be created with the test results.
+  githubToken: # optional, default is 
+  # Name for the check run that is created when a github token is provided.
+  checkName: # optional, default is Test Results
+  # Whether the tests are being run for a Unity package instead of a Unity project. If true, the action can only be run on Linux runners, and any custom docker image passed to this action must have `jq` installed. NOTE: may not work properly for packages with dependencies outside of the Unity Registry.
+  packageMode: false
+  # Scoped registry to use for resolving package dependencies. Only applicable if packageMode is true.
+  scopedRegistryUrl: # optional, default is 
+  # Registry scopes to use for resolving package dependencies. Only applicable if packageMode is true. Required if scopedRegistry is set.
+  registryScopes: # optional, default is 
+  # User and optionally group (user or user:group or uid:gid) to give ownership of the resulting build artifacts
+  chownFilesTo: # optional, default is 
+  # Number of CPU cores to assign the docker container. Defaults to all available cores on all platforms.
+  dockerCpuLimit: # optional, default is 
+  # Amount of memory to assign the docker container. Defaults to 95% of total system memory rounded down to the nearest megabyte on Linux and 80% on Windows. On unrecognized platforms, defaults to 75% of total system memory. To manually specify a value, use the format <number><unit>, where unit is either m or g. ie: 512m = 512 megabytes
+  dockerMemoryLimit: # optional, default is 
+  # Isolation mode to use for the docker container. Can be one of process, hyperv, or default. Default will pick the default mode as described by Microsoft where server versions use process and desktop versions use hyperv. Only applicable on Windows
+  dockerIsolationMode: # optional, default is default
+  # Url to a unity license server for acquiring floating licenses.
+  unityLicensingServer: # optional, default is 
+  # Container registry and repository to pull image from. Only applicable if customImage is not set.
+  containerRegistryRepository: # optional, default is unityci/editor
+  # Container registry image version. Only applicable if customImage is not set.
+  containerRegistryImageVersion: # optional, default is 3
+  # Whether to run as a user that matches the host system or the default root container user. Only applicable to Linux hosts and containers. This is useful for fixing permission errors on Self-Hosted runners.
+  runAsHostUser: # optional, default is false
+        
