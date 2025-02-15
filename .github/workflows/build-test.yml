@@ -1,4 +1,4 @@
-name: Build Tester
+name: Build-Tester
 
 on:
   pull_request:
