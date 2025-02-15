@@ -3,7 +3,7 @@ name: Unity Post-Merge Build
 on:
   push:
     branches:
-      - master  # Runs a full build when a PR is merged into 'master'
+      - master  # Runs after merging into 'master'
 
 jobs:
   build:
@@ -11,8 +11,9 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneWindows64
+          - StandaloneLinux64
+          - iOS
           - Android
-          - WebGL
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +21,13 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      
+      # ✅ Ensure Unity is installed with required modules
+      - name: Set up Unity
+        uses: game-ci/setup-unity@v4
+        with:
+          unityVersion: 6000.0.36f1
+          modules: StandaloneWindows64, StandaloneLinux64, iOS, Android
 
       - uses: actions/cache@v4
         with:
@@ -28,8 +36,8 @@ jobs:
           restore-keys: Library-
 
       - if: matrix.targetPlatform == 'Android'
-        uses: jlumbroso/free-disk-space@main
-
+        uses: jlumbroso/free-disk-space@v1.4.0  # Free up space for Android builds
+      
       - name: Build for ${{ matrix.targetPlatform }}
         uses: game-ci/unity-builder@v4
         env:
@@ -38,20 +46,30 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          unityVersion: 6000.0.36f1
-          modules: StandaloneLinux64, StandaloneWindows64, WebGL
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+
+  release:
+    needs: build  # Runs only after all builds are finished
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Delete Old GitHub Release
         uses: liudonghua123/delete-release-action@v1
         with:
           release_name: 'latest'
-        continue-on-error: true 
+        continue-on-error: true  # Ignores errors if release doesn't exist
 
       - name: Delete Old Git Tag (If Exists)
         run: |
           git tag -d latest || true
           git push origin --delete latest || true
-        continue-on-error: true  
+        continue-on-error: true  # Ignores errors if tag doesn't exist
 
       - name: Create or Update "Latest" Release
         uses: softprops/action-gh-release@v1
