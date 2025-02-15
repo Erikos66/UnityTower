@@ -1,4 +1,4 @@
-name: Test Runner
+name: Test project
 
 on: [push, pull_request]
 
@@ -10,15 +10,21 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - test-package
-        unityVersion: '6000.0.2f1' # some version must be included for package testing
+          - test-project
         testMode:
           - playmode
           - editmode
+          - standalone
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - uses: actions/cache@v3
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
       - uses: game-ci/unity-test-runner@v4
         id: tests
         env:
@@ -26,9 +32,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          packageMode: true
           projectPath: ${{ matrix.projectPath }}
-          unityVersion: ${{ matrix.unityVersion }}
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
