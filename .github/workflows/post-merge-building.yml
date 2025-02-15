@@ -10,10 +10,7 @@ jobs:
     strategy:
       matrix:
         targetPlatform:
-          - StandaloneOSX
-          - StandaloneWindows
           - StandaloneWindows64
-          - StandaloneLinux64
           - iOS
           - Android
           - WebGL
@@ -44,9 +41,9 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
 
       - name: Delete Old GitHub Release
-        uses: dawidd6/action-delete-release@v2
+        uses: liudonghua123/delete-release-action@v1
         with:
-          tag_name: latest
+          release_name: 'latest'
           github_token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true 
 
@@ -57,7 +54,7 @@ jobs:
         continue-on-error: true  
 
       - name: Create or Update "Latest" Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           release_name: "Latest Unity Build"
