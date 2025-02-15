@@ -60,10 +60,7 @@ jobs:
     strategy:
       matrix:
         targetPlatform:
-          - StandaloneOSX
-          - StandaloneWindows
           - StandaloneWindows64
-          - StandaloneLinux64
           - iOS
           - Android
           - WebGL
