@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4404997423493850195}
   - component: {fileID: 3193228696022496895}
   - component: {fileID: 1233622048490812667}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: basic_enemy_wheels_back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,7 +113,7 @@ GameObject:
   - component: {fileID: 8707342589671313069}
   - component: {fileID: 6954146923618018548}
   - component: {fileID: 555312104723063639}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: basic_enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 6594545946964818981}
   - component: {fileID: 5206768994634776484}
   - component: {fileID: 2235671536440693243}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: basic_enemy_emission_blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 3842608956067364214}
   - component: {fileID: 3186906295956625374}
   - component: {fileID: 1048163524406510854}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: basic_enemy_wheels_front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -389,7 +389,7 @@ GameObject:
   - component: {fileID: 1703979163556882182}
   - component: {fileID: 724594997962063170}
   - component: {fileID: 8796067588954202381}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Basic_Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
