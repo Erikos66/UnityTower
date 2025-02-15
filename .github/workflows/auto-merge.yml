@@ -1,0 +1,62 @@
+name: Auto Merge Approved PRs
+
+# Schedule the workflow to run every day at midnight UTC
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto merge PRs with approved reviews
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Get all open pull requests for the repo
+            const { data: pullRequests } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            
+            console.log(`Found ${pullRequests.length} open PR(s).`);
+
+            for (const pr of pullRequests) {
+              console.log(`Processing PR #${pr.number}: ${pr.title}`);
+              
+              // Retrieve the reviews for this pull request
+              const { data: reviews } = await github.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+              });
+              
+              // Check if there is at least one APPROVED review
+              const hasApprovedReview = reviews.some(review => review.state === 'APPROVED');
+              if (!hasApprovedReview) {
+                console.log(`PR #${pr.number} does not have an approved review. Skipping.`);
+                continue;
+              }
+              
+              // Optionally, you can check the mergeable_state.
+              // Note: mergeable_state may be null if GitHub is still calculating.
+              if (pr.mergeable_state && pr.mergeable_state !== 'clean') {
+                console.log(`PR #${pr.number} is not in a 'clean' state (${pr.mergeable_state}). Skipping.`);
+                continue;
+              }
+              
+              // Attempt to merge the PR
+              try {
+                await github.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  commit_title: `Auto-merging PR #${pr.number}: ${pr.title}`,
+                });
+                console.log(`Successfully merged PR #${pr.number}.`);
+              } catch (error) {
+                console.log(`Failed to merge PR #${pr.number}: ${error.message}`);
+              }
+            }
