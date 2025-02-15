@@ -1,0 +1,60 @@
+name: Unity Playmode Test
+
+on:
+  pull_request:
+    branches:
+      - master  # Runs playmode tests when a PR is made to 'master'
+
+jobs:
+  test-playmode:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Detect Changed Test Files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: test-package/Tests/**/*  # Adjust path based on your Unity test directory
+
+      - name: Run Playmode Tests
+        if: steps.changed-files.outputs.any_changed == 'true'  # Runs only if test files changed
+        uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: test-package
+          unityVersion: 2022.3.7f1
+          testMode: playmode
+          artifactsPath: playmode-artifacts
+          rerunFailedTests: true  # ✅ Only rerun failing tests
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Playmode Test Results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport'
+
+      - name: Report Test Results to PR
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Playmode Test Results
+          path: ${{ steps.tests.outputs.artifactsPath }}/TestResults.xml
+          reporter: jest-junit  # ✅ Will cause PR failure if tests fail
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Playmode Test Results
+          path: ${{ steps.tests.outputs.artifactsPath }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Playmode Coverage Results
+          path: ${{ steps.tests.outputs.coveragePath }}
