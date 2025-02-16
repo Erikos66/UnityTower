@@ -24,7 +24,7 @@ jobs:
             git fetch origin pull/$FIRST_PR/head:pr-$FIRST_PR
             git checkout main
             git merge --no-ff pr-$FIRST_PR
-            git push origin main
+            git push origin master
             # Remove the first line from the queue file
             sed -i '' 1d .github/merge-queue.txt || sed -i '1d' .github/merge-queue.txt
           else
