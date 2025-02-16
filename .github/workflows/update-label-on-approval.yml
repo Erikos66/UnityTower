@@ -1,0 +1,46 @@
+name: Update PR Labels on Approval
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  update-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR labels based on review state
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const review = context.payload.review;
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Only process if the review is approved
+            if (review.state.toLowerCase() === "approved") {
+              console.log(`Review approved for PR #${pr.number}`);
+              // Remove "Needs Review" label if it exists
+              try {
+                await github.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  name: "Needs Review"
+                });
+                console.log(`Removed "Needs Review" label from PR #${pr.number}`);
+              } catch (error) {
+                console.log(`"Needs Review" label not found on PR #${pr.number}.`);
+              }
+              
+              // Add "Ready to Merge" label
+              await github.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels: ["Ready to Merge"]
+              });
+              console.log(`Added "Ready to Merge" label to PR #${pr.number}`);
+            } else {
+              console.log(`Review state is "${review.state}" - no label changes applied.`);
+            }
