@@ -8,7 +8,7 @@ Please include a summary of the changes.
 
 # Changes
 
-# Briefly describe each change (e.g., "Fixed player movement jitter", "Refactored enemy AI", "Updated UI for level selection").
+Briefly describe each change (e.g., "Fixed player movement jitter", "Refactored enemy AI", "Updated UI for level selection").
 
 ---
 
