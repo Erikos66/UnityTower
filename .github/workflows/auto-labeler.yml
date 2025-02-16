@@ -8,83 +8,8 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto-label PR based on changes and description
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const prNumber = pr.number;
-            let labelsToAdd = [];
+      - name: Check out code
+        uses: actions/checkout@v3
 
-            // 1. Check for linked issue in the PR body using common keywords (fixes, closes, resolves)
-            if (pr.body && /(?:fix(?:es|ed)?|close(?:s|d)?|resolve(?:s|d)?)\s+#\d+/i.test(pr.body)) {
-              labelsToAdd.push("Bugfix");
-              console.log("Detected linked issue: adding 'Bugfix'");
-            }
-
-            // 2. Retrieve list of files changed in the PR
-            const per_page = 100;
-            let page = 1;
-            let files = [];
-            let response;
-
-            do {
-              response = await github.pulls.listFiles({
-                owner,
-                repo,
-                pull_number: prNumber,
-                per_page,
-                page
-              });
-              files = files.concat(response.data);
-              page++;
-            } while (response.data.length === per_page);
-
-            // Initialize conditions
-            let hasCSharp = false;
-            let hasModifiedCSharp = false;
-            let hasAddedFile = false;
-
-            // Evaluate each file in the PR
-            for (const file of files) {
-              // Check for C# files
-              if (file.filename.endsWith(".cs")) {
-                hasCSharp = true;
-                if (file.status === "modified") {
-                  hasModifiedCSharp = true;
-                }
-              }
-              // Check if any file was added
-              if (file.status === "added") {
-                hasAddedFile = true;
-              }
-            }
-
-            if (hasCSharp) {
-              labelsToAdd.push("C#");
-              console.log("Detected C# file(s): adding 'C#'");
-            }
-
-            if (hasModifiedCSharp) {
-              labelsToAdd.push("Refactor");
-              console.log("Detected modified C# file(s): adding 'Refactor'");
-            }
-
-            if (hasAddedFile) {
-              labelsToAdd.push("New Assets");
-              console.log("Detected added file(s): adding 'New Assets'");
-            }
-
-            console.log("Labels to add: " + labelsToAdd.join(", "));
-
-            // Add the computed labels to the PR (if not already present)
-            if (labelsToAdd.length > 0) {
-              await github.issues.addLabels({
-                owner,
-                repo,
-                issue_number: prNumber,
-                labels: labelsToAdd
-              });
-            }
+      - name: Label PR based on file changes
+        uses: actions/labeler@v3
