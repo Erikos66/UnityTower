@@ -13,3 +13,5 @@ jobs:
 
       - name: Label PR based on file changes
         uses: actions/labeler@v3
+        with:
+          repo-token: ${{ secrets.PAT_TOKEN }}
