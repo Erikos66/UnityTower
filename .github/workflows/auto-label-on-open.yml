@@ -1,0 +1,24 @@
+name: Auto Label on PR Open
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  add-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add "Needs Review" label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            await github.issues.addLabels({
+              owner,
+              repo,
+              issue_number: pr.number,
+              labels: ["Needs Review"]
+            });
+            console.log(`Added "Needs Review" label to PR #${pr.number}`);
