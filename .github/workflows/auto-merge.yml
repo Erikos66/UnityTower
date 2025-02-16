@@ -1,62 +1,32 @@
-name: Auto Merge Approved PRs
+name: Process Merge Queue
 
-# Schedule the workflow to run every day at midnight UTC
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '0 0 * * *'  # Runs once every 24 hours at midnight UTC
 
 jobs:
-  auto-merge:
+  process-queue:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto merge PRs with approved reviews
-        uses: actions/github-script@v6
-        with:
-          script: |
-            // Get all open pull requests for the repo
-            const { data: pullRequests } = await github.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open'
-            });
-            
-            console.log(`Found ${pullRequests.length} open PR(s).`);
+      - name: Check out the code
+        uses: actions/checkout@v3
 
-            for (const pr of pullRequests) {
-              console.log(`Processing PR #${pr.number}: ${pr.title}`);
-              
-              // Retrieve the reviews for this pull request
-              const { data: reviews } = await github.pulls.listReviews({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-              });
-              
-              // Check if there is at least one APPROVED review
-              const hasApprovedReview = reviews.some(review => review.state === 'APPROVED');
-              if (!hasApprovedReview) {
-                console.log(`PR #${pr.number} does not have an approved review. Skipping.`);
-                continue;
-              }
-              
-              // Optionally, you can check the mergeable_state.
-              // Note: mergeable_state may be null if GitHub is still calculating.
-              if (pr.mergeable_state && pr.mergeable_state !== 'clean') {
-                console.log(`PR #${pr.number} is not in a 'clean' state (${pr.mergeable_state}). Skipping.`);
-                continue;
-              }
-              
-              // Attempt to merge the PR
-              try {
-                await github.pulls.merge({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: pr.number,
-                  commit_title: `Auto-merging PR #${pr.number}: ${pr.title}`,
-                });
-                console.log(`Successfully merged PR #${pr.number}.`);
-              } catch (error) {
-                console.log(`Failed to merge PR #${pr.number}: ${error.message}`);
-              }
-            }
+      - name: Process Merge Queue
+        run: |
+          if [ ! -f .github/merge-queue.txt ]; then
+            echo "Merge queue file does not exist. Exiting..."
+            exit 0
+          fi
+          QUEUE=$(cat .github/merge-queue.txt)
+          if [[ "$QUEUE" != "" ]]; then
+            FIRST_PR=$(head -n 1 .github/merge-queue.txt)
+            echo "Processing PR #$FIRST_PR"
+            git fetch origin pull/$FIRST_PR/head:pr-$FIRST_PR
+            git checkout main
+            git merge --no-ff pr-$FIRST_PR
+            git push origin main
+            # Remove the first line from the queue file
+            sed -i '' 1d .github/merge-queue.txt || sed -i '1d' .github/merge-queue.txt
+          else
+            echo "No PRs in the queue."
+          fi
