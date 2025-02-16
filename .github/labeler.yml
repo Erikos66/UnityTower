@@ -1,0 +1,9 @@
+# .github/labeler.yml
+
+# Label a PR if it touches any C# files
+C#:
+  - '**/*.cs'
+
+# Label a PR for new assets (adjust the pattern as needed)
+New Assets:
+  - 'assets/**'
