@@ -1,0 +1,79 @@
+name: Queue Ready PRs
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+
+jobs:
+  queue-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Find and update PRs labeled "Ready to Merge"
+        id: update_prs
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumbers = [];
+            const { data: pullRequests } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            // Loop through open PRs and look for those with the "Ready to Merge" label
+            for (const pr of pullRequests) {
+              const labels = pr.labels.map(label => label.name);
+              if (labels.includes("Ready to Merge")) {
+                prNumbers.push(pr.number);
+                // Remove "Ready to Merge" label
+                try {
+                  await github.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    name: "Ready to Merge"
+                  });
+                  console.log(`Removed "Ready to Merge" from PR #${pr.number}`);
+                } catch (error) {
+                  console.log(`Could not remove "Ready to Merge" from PR #${pr.number}: ${error}`);
+                }
+                // Add "Merge Queue" label
+                await github.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ["Merge Queue"]
+                });
+                console.log(`Added "Merge Queue" to PR #${pr.number}`);
+              }
+            }
+            // Return the list of PR numbers to be queued
+            return JSON.stringify(prNumbers);
+          result-encoding: string
+
+      - name: Append PR numbers to merge queue file
+        if: steps.update_prs.outputs.result != '[]'
+        run: |
+          echo "Appending PRs to the merge queue..."
+          # Parse the JSON output into separate PR numbers
+          PR_NUMBERS=$(echo '${{ steps.update_prs.outputs.result }}' | jq -r '.[]')
+          for pr in $PR_NUMBERS; do
+            echo "$pr" >> .github/merge-queue.txt
+            echo "Added PR #$pr to merge queue."
+          done
+
+      - name: Commit merge queue updates
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add .github/merge-queue.txt
+            git commit -m "Queue PRs: added new PR(s) to merge queue"
+            git push
+          fi
