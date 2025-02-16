@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Base class for towers, handling targeting, rotation, and attacking behaviors.
 /// </summary>
-public class Tower : MonoBehaviour {
+public class Tower : MonoBehaviour
+{
     public enum TargetMode { Closest, Random } // Enumeration for the different targeting modes.
 
     [SerializeField] protected float attackCooldown = 1f; // Attack cooldown duration in seconds.
@@ -21,27 +22,32 @@ public class Tower : MonoBehaviour {
     /// <summary>
     /// Unity Update method to process targeting, rotation, and attacking.
     /// </summary>
-    protected virtual void Update() {
+    protected virtual void Update()
+    {
         FindTarget();
         RotateTowardsEnemy();
-        if (currentEnemy != null && Time.time - lastTimeAttacked >= attackCooldown) {
+        if (currentEnemy != null && Time.time - lastTimeAttacked >= attackCooldown)
+        {
             lastTimeAttacked = Time.time;
             Attack();
         }
-    }
+    } // Ignore this comment
 
     /// <summary>
     /// Unity Awake method.
     /// </summary>
-    protected virtual void Awake() {
+    protected virtual void Awake()
+    {
     }
 
     /// <summary>
     /// Finds and assigns the target enemy based on the selected targeting mode.
     /// </summary>
-    protected virtual void FindTarget() {
+    protected virtual void FindTarget()
+    {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, LayerMask.GetMask("Enemy"));
-        switch (targetMode) {
+        switch (targetMode)
+        {
             case TargetMode.Closest:
                 FindClosestEnemy(hitEnemies);
                 break;
@@ -57,7 +63,8 @@ public class Tower : MonoBehaviour {
     /// <summary>
     /// Initiates an attack on the current target enemy.
     /// </summary>
-    protected virtual void Attack() {
+    protected virtual void Attack()
+    {
         if (currentEnemy == null) return;
     }
 
@@ -65,12 +72,15 @@ public class Tower : MonoBehaviour {
     /// Finds and assigns the closest enemy within the attack range.
     /// </summary>
     /// <param name="hitEnemies">Array of enemy colliders within range.</param>
-    protected void FindClosestEnemy(Collider[] hitEnemies) {
+    protected void FindClosestEnemy(Collider[] hitEnemies)
+    {
         currentEnemy = null;
         float closestDistanceSqr = attackRange * attackRange;
-        foreach (var enemy in hitEnemies) {
+        foreach (var enemy in hitEnemies)
+        {
             float distanceSqr = (transform.position - enemy.transform.position).sqrMagnitude;
-            if (distanceSqr < closestDistanceSqr) {
+            if (distanceSqr < closestDistanceSqr)
+            {
                 closestDistanceSqr = distanceSqr;
                 currentEnemy = enemy.transform;
             }
@@ -81,9 +91,11 @@ public class Tower : MonoBehaviour {
     /// Finds and assigns a random enemy within the attack range if a valid target is not already assigned.
     /// </summary>
     /// <param name="hitEnemies">Array of enemy colliders within range.</param>
-    protected void FindRandomEnemy(Collider[] hitEnemies) {
+    protected void FindRandomEnemy(Collider[] hitEnemies)
+    {
         if (hitEnemies.Length == 0 ||
-            (currentEnemy != null && (transform.position - currentEnemy.position).sqrMagnitude <= attackRange * attackRange)) {
+            (currentEnemy != null && (transform.position - currentEnemy.position).sqrMagnitude <= attackRange * attackRange))
+        {
             return;
         }
         int randomIndex = Random.Range(0, hitEnemies.Length);
@@ -93,7 +105,8 @@ public class Tower : MonoBehaviour {
     /// <summary>
     /// Rotates the tower head smoothly towards the current enemy.
     /// </summary>
-    protected virtual void RotateTowardsEnemy() {
+    protected virtual void RotateTowardsEnemy()
+    {
         if (!canRotate || currentEnemy == null) return;
         Vector3 directionToEnemy = currentEnemy.position - towerHead.position;
         Quaternion lookRotation = Quaternion.LookRotation(directionToEnemy);
@@ -103,7 +116,8 @@ public class Tower : MonoBehaviour {
     /// <summary>
     /// Draws a visual gizmo for the attack range in the Unity editor.
     /// </summary>
-    protected virtual void OnDrawGizmos() {
+    protected virtual void OnDrawGizmos()
+    {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
@@ -113,7 +127,8 @@ public class Tower : MonoBehaviour {
     /// </summary>
     /// <param name="startPoint">The starting point to measure from.</param>
     /// <returns>The normalized direction vector or Vector3.zero if no current enemy exists.</returns>
-    protected Vector3 DirectionToEnemy(Transform startPoint) {
+    protected Vector3 DirectionToEnemy(Transform startPoint)
+    {
         if (currentEnemy == null) return Vector3.zero;
         return (currentEnemy.position - startPoint.position).normalized;
     }
@@ -122,7 +137,8 @@ public class Tower : MonoBehaviour {
     /// Enables or disables the rotation of the tower head.
     /// </summary>
     /// <param name="enable">If true, tower head rotation is enabled; otherwise, it is disabled.</param>
-    public void EnableRotation(bool enable) {
+    public void EnableRotation(bool enable)
+    {
         canRotate = enable;
     }
 }
