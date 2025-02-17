@@ -68,6 +68,7 @@ public class EnemyGroundMovement : MonoBehaviour, IDamageable {
         }
     }
 
+    // Reduces the enemy's health by the specified damage amount.
     public void TakeDamage(int damage) {
         health -= damage;
         if (health <= 0) {
