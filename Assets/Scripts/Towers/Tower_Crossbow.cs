@@ -8,6 +8,7 @@ public class Tower_Crossbow : Tower {
 
     [Header("Crossbow Settings")]
     [SerializeField] private Transform gunPoint; // Transform representing the gun point from where the raycast is fired.
+    [SerializeField] private int TowerDamage = 1; // The amount of damage the tower deals to enemies.
 
     /// <summary>
     /// Unity Awake method for caching the visuals component.
@@ -27,6 +28,8 @@ public class Tower_Crossbow : Tower {
         // Perform a raycast to detect if an enemy is hit.
         if (Physics.Raycast(gunPoint.position, directionToEnemy, out RaycastHit hitInfo, attackRange, LayerMask.GetMask("Enemy"))) {
             towerHead.forward = directionToEnemy; // Rotate the tower head to face the enemy.
+            IDamageable damageable = hitInfo.transform.GetComponent<IDamageable>(); // Retrieve the IDamageable component from the hit object.
+            damageable?.TakeDamage(TowerDamage); // Deal damage to the enemy if it has the IDamageable component.
             if (hitInfo.transform == currentEnemy) { // Check if the detected enemy is the current target.
                 Debug.DrawRay(gunPoint.position, directionToEnemy * attackRange, Color.red, 1f); // Debug visual: draw ray.
                 Debug.DrawRay(gunPoint.position, directionToEnemy * attackRange, Color.red, 1f); // (Optional duplicate for debugging.)
