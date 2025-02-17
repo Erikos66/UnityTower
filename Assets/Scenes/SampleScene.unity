@@ -654,6 +654,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4750005579136669554, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
+      propertyPath: targetMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6445127987049667747, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
       propertyPath: m_Name
       value: Tower_Crossbow (2)
@@ -2206,6 +2210,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4750005579136669554, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
+      propertyPath: targetMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6445127987049667747, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
       propertyPath: m_Name
       value: Tower_Crossbow (3)
@@ -2530,6 +2538,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4750005579136669554, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
+      propertyPath: targetMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6445127987049667747, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
       propertyPath: m_Name
       value: Tower_Crossbow (1)
@@ -5137,6 +5149,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4750005579136669554, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
+      propertyPath: targetMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6445127987049667747, guid: 4b269d265692ab1498a99320ca1e3110, type: 3}
       propertyPath: m_Name
       value: Tower_Crossbow

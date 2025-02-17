@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Timeline;
+using System.Collections;
 
 // This class defines the behavior for the Tower_Crossbow,
 // handling targeting, shooting via raycasts, and triggering visual effects.
@@ -22,20 +23,20 @@ public class Tower_Crossbow : Tower {
     /// and trigger both shooting and reload visual effects.
     /// </summary>
     protected override void Attack() {
-        base.Attack(); // Execute base attack behavior.
-        Vector3 directionToEnemy = DirectionToEnemy(gunPoint); // Calculate direction from gunPoint to the enemy.
+        base.Attack();
+        StartCoroutine(FireAndTrack());
+    }
 
-        // Perform a raycast to detect if an enemy is hit.
-        if (Physics.Raycast(gunPoint.position, directionToEnemy, out RaycastHit hitInfo, attackRange, LayerMask.GetMask("Enemy"))) {
-            towerHead.forward = directionToEnemy; // Rotate the tower head to face the enemy.
-            IDamageable damageable = hitInfo.transform.GetComponent<IDamageable>(); // Retrieve the IDamageable component from the hit object.
-            damageable?.TakeDamage(TowerDamage); // Deal damage to the enemy if it has the IDamageable component.
-            if (hitInfo.transform == currentEnemy) { // Check if the detected enemy is the current target.
-                Debug.DrawRay(gunPoint.position, directionToEnemy * attackRange, Color.red, 1f); // Debug visual: draw ray.
-                Debug.DrawRay(gunPoint.position, directionToEnemy * attackRange, Color.red, 1f); // (Optional duplicate for debugging.)
-                visuals.PlayAttackVFX(gunPoint.position, hitInfo.point); // Trigger the attack visual effects.
-                visuals.ReloadDurationVFX(attackCooldown); // Trigger the reload visual effects based on attack cooldown.
-            }
+    // New coroutine to track enemy movement after firing.
+    private IEnumerator FireAndTrack() {
+        // Continuously update the raycast visual for attackVisualsDuration
+        yield return StartCoroutine(visuals.TrackEnemyVFX(gunPoint, currentEnemy.transform, attackCooldown / 2f));
+        // After tracking, apply damage (if enemy is still valid).
+        if (currentEnemy != null) {
+            IDamageable damageable = currentEnemy.GetComponent<IDamageable>();
+            damageable?.TakeDamage(TowerDamage);
         }
+        // Trigger reload visual effects while keeping rotation enabled.
+        visuals.ReloadDurationVFX(attackCooldown);
     }
 }

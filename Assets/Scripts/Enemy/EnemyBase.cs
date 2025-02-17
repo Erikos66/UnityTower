@@ -4,12 +4,14 @@ using UnityEngine;
 using UnityEngine.AI;
 
 // This script controls the movement of ground type enemies along a path of waypoints.
-public class EnemyGroundMovement : MonoBehaviour, IDamageable {
+public class EnemyBase : MonoBehaviour, IDamageable {
     private List<Transform> waypoints; // List of waypoints for the enemy to follow.
     private int currentWaypointIndex = 0; // Index of the current waypoint in the list.
     private NavMeshAgent agent; // Reference to the NavMeshAgent component.
     public float rotationSpeed = 5f; // Speed at which the enemy rotates toward the next waypoint.
+    public float totalDistanceLeft; // Total distance left to reach the end of the path.
     [SerializeField] private int health = 1; // The health of the enemy.
+    [SerializeField] private Transform centerpoint; // The centerpoint of the enemy.
 
     void Start() {
         agent = GetComponent<NavMeshAgent>();
@@ -44,6 +46,7 @@ public class EnemyGroundMovement : MonoBehaviour, IDamageable {
             }
         }
         RotateTowards(agent.steeringTarget);
+        UpdateTotalDistanceLeft(); // Update remaining distance each frame
     }
 
     // Sets the NavMeshAgent's destination to the current waypoint.
@@ -75,4 +78,19 @@ public class EnemyGroundMovement : MonoBehaviour, IDamageable {
             Destroy(gameObject);
         }
     }
+
+    // New helper method to update totalDistanceLeft based on current path
+    void UpdateTotalDistanceLeft() {
+        if (waypoints == null || waypoints.Count == 0 || currentWaypointIndex >= waypoints.Count) {
+            totalDistanceLeft = 0;
+            return;
+        }
+        float distance = Vector3.Distance(transform.position, waypoints[currentWaypointIndex].position);
+        for (int i = currentWaypointIndex; i < waypoints.Count - 1; i++) {
+            distance += Vector3.Distance(waypoints[i].position, waypoints[i + 1].position);
+        }
+        totalDistanceLeft = distance;
+    }
+
+    public Vector3 CenterPoint() => centerpoint.position;
 }

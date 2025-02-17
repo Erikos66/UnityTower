@@ -147,6 +147,19 @@ public class Tower_Crossbow_Visuals : MonoBehaviour {
 
     }
 
+    // New: continuously update the attack visual so it follows the enemy.
+    public IEnumerator TrackEnemyVFX(Transform gunPoint, Transform enemyTransform, float duration) {
+        float timer = 0f;
+        while (timer < duration && enemyTransform != null) {
+            attackVisuals.enabled = true;
+            attackVisuals.SetPosition(0, gunPoint.position);
+            attackVisuals.SetPosition(1, enemyTransform.position);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        attackVisuals.enabled = false;
+    }
+
     public void ConnectCrossbowStrings() {
         // Connect front left: from frontRotar_L to frontCrossbow_L
         if (frontString_L != null && frontRotar_L != null && frontCrossbow_L != null) {
