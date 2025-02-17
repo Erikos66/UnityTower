@@ -4,11 +4,12 @@ using UnityEngine;
 using UnityEngine.AI;
 
 // This script controls the movement of ground type enemies along a path of waypoints.
-public class EnemyGroundMovement : MonoBehaviour {
+public class EnemyGroundMovement : MonoBehaviour, IDamageable {
     private List<Transform> waypoints; // List of waypoints for the enemy to follow.
     private int currentWaypointIndex = 0; // Index of the current waypoint in the list.
     private NavMeshAgent agent; // Reference to the NavMeshAgent component.
     public float rotationSpeed = 5f; // Speed at which the enemy rotates toward the next waypoint.
+    [SerializeField] private int health = 1; // The health of the enemy.
 
     void Start() {
         agent = GetComponent<NavMeshAgent>();
@@ -64,6 +65,14 @@ public class EnemyGroundMovement : MonoBehaviour {
         if (direction != Vector3.zero) {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+    }
+
+    // Reduces the enemy's health by the specified damage amount.
+    public void TakeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            Destroy(gameObject);
         }
     }
 }
